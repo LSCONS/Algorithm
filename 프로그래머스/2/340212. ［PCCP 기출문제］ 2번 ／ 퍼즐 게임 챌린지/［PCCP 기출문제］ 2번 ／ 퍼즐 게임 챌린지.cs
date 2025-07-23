@@ -1,70 +1,47 @@
-using System.Diagnostics;
-using System.IO;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+
 using System;
-using System.Reflection.Metadata;
-using System.Collections.Generic;
 using System.Linq;
-using System.IO.IsolatedStorage;
-using System.Runtime.InteropServices;
 
-    public class Solution
-    {
-        public int solution(int[] diffs, int[] times, long limit)
+public class Solution {
+    public int solution(int[] diffs, int[] times, long limit) {
+        int min = diffs[0];
+        int max = diffs.Max();
+        int level;
+        while (true)
         {
-            int count = 0;
-            int maxLenght = diffs.Length;
-            int level = 0;
-            int addLevel = 0;
-            int maxCount = int.MaxValue;
-            int gap = 0;
-            long result = 0;
-            bool isCan = true;
-            
-            while (true)
+            if (min == max)
             {
-                isCan = true;
-                addLevel = 1 << count;
-                result = 0;
-                gap = diffs[0] - (level + addLevel);
-                if (gap < 0) gap = 0;
-                result = result + (gap + 1) * times[0];
+                level = min;
+                break;
+            }
 
-                for (int i = maxLenght - 1; i >= 1; i--)
-                {
-                    gap = diffs[i] - (level + addLevel);
-                    if (gap < 0) gap = 0;
-
-                    result = result + gap * (times[i] + times[i - 1]) + times[i];
-                    if (result > limit)
-                    {
-                        isCan = false;
-                        break;
-                    }
-                }
-
-                if (isCan)
-                {
-                    if (count == 0)
-                    {
-                        return level + addLevel;
-                    }
-                    level += (1 << (count - 1));
-                    maxCount = count;
-                    count = 0;
-                }
-                else
-                {
-                    count++;
-                    if (count >= maxCount)
-                    {
-                        level += addLevel;
-                        maxCount = count - 1;
-                        count = 0;
-                    }
-                }
+            level = (min + max) / 2;
+            if (CanSolve(level, diffs, times, limit))
+            {
+                max = max == level ? level - 1 : level;
+            }
+            else
+            {
+                min = min == level ? level + 1 : level;    
             }
         }
+        return level;
     }
+
+    private bool CanSolve(int level, int[] diffs, int[] times, long limit)
+    {
+        long time = 0;
+        for (int i = 0; i < diffs.Length; i++)
+        {
+            time += Solve(diffs[i], level, times[i], i > 0 ? times[i - 1] : 0);
+        }
+        return time <= limit;
+    }
+
+    private long Solve(int diff, int level, int time_cur, int time_prev)
+    {
+        int difficulty = diff - level;
+        difficulty = difficulty > 0 ? difficulty : 0;
+        return time_cur + difficulty * (time_cur + time_prev);
+    }
+}
