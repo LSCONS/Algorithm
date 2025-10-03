@@ -5,8 +5,15 @@ public class Solution
     public int solution(int[] num_list) 
     {
         int answer = 0;
-        foreach(int i in num_list)
-            answer += (int)Math.Floor(Math.Log(i, 2));
+        
+        for(int i = 0; i < num_list.Length; i++)
+        {
+            while(num_list[i] != 1)
+            {
+                answer++;
+                num_list[i] = num_list[i] >> 1;
+            }
+        }
         return answer;
     }
 }
